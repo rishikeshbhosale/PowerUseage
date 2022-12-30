@@ -1,8 +1,7 @@
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import connection from "../dbConfig/db.js"
-
-
+import session from "express-session";
 
 export const register = async (req, res, next) => {
 
@@ -83,11 +82,10 @@ export const login = async (req, res) => {
                                     message: "Incorrect Password !!! Please try again.",
                                 });
                             } else {
+                                                               
+                                const token = jwt.sign({ id: result[0].user_id }, process.env.JWT_SECRET);
+                                res.status(200).json({token});
                                 
-                                res.status(201).json({
-                                    status: "success",
-                                    message: "User Present",
-                                });
                             }
                         } else {
                             res.status(300).json({
@@ -99,21 +97,8 @@ export const login = async (req, res) => {
                 }
             );
 
-
-
-
         }
 
-
-        // const user = await User.findOne({ email: email });
-        // if (!user) return res.status(400).json({ msg: "Please check username" });
-
-        // const checkPass = await bcrypt.compare(password, user.password);
-        // if (!checkPass) return res.status(400).json({ msg: "Incorrect Password !!! Please try again." });
-
-        // const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET);
-        // delete user.password;
-        // res.status(200).json({ token, user });
     } catch (err) {
         res.status(500).json({ error: err.message });
     }
