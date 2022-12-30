@@ -1,9 +1,11 @@
 import express from "express";
 import bodyParser from "body-parser";
 import dotenv from "dotenv";
-import path from "path";
-import mysql from "mysql";
+import session from "express-session";
+import cookieParser from "cookie-parser";
+
 import usePath from "./routes/user.js"
+
 
 
 
@@ -16,6 +18,18 @@ app.use(bodyParser.json())
 app.listen(process.env.PORT,()=>{
     console.log(`Server Started on port ${process.env.PORT}`);
 })
+
+app.use(session({  
+    name: `Sessions`,
+    secret: process.env.SESSION_SECRET,  
+    resave: false,
+    saveUninitialized: false,
+    cookie: { 
+      secure: false, 
+      maxAge: 300000 // 5 min
+    } 
+  }));
+  app.use(cookieParser());
 
 app.get('/', (req, res) => res.send('WELCOME'));
 
