@@ -1,7 +1,6 @@
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import connection from "../dbConfig/db.js"
-import session from "express-session";
 
 export const register = async (req, res, next) => {
 
@@ -68,9 +67,8 @@ export const login = async (req, res) => {
                             message: err.sqlMessage,
                         });
                     } else {
-                        console.log(result);
+                        // console.log(result);
                         if (Object.keys(result).length > 0) {
-                            console.log(result[0].u_password + " ++++++++++++++++++++++++++++++++++++++++++++++" + " password " + password);
 
                             const checkPass = bcrypt.compareSync(password, result[0].u_password);
 
@@ -82,10 +80,16 @@ export const login = async (req, res) => {
                                     message: "Incorrect Password !!! Please try again.",
                                 });
                             } else {
-                                                               
-                                const token = jwt.sign({ id: result[0].user_id }, process.env.JWT_SECRET);
-                                res.status(200).json({token});
-                                
+                                const uid = result[0].user_id
+                                const token = jwt.sign({ id: uid }, process.env.JWT_SECRET, {
+                                    expiresIn: '5m'
+                                });
+
+                                let now = new Date();
+                                now.setMinutes(now.getMinutes() + 5);
+                                now = new Date(now);
+                                res.status(200).json({ token, uid, expiresIn: now });
+
                             }
                         } else {
                             res.status(300).json({
@@ -102,6 +106,15 @@ export const login = async (req, res) => {
     } catch (err) {
         res.status(500).json({ error: err.message });
     }
+}
+
+export const logout = async (req, res, next) => {
+   
+    const token = "";
+    const uid = -1
+
+    res.status(200).json({ token, uid });
+    next();
 }
 
 export default register;
